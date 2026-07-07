@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Random Word Generator (No Repeats)</title>
+        #status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Custom Random Word Generator</h2>
+    <p>Paste or type your words below (separated by commas or spaces):</p>
+    
+    <!-- Added oninput to reset the tracking pool whenever you modify the text -->
+    <textarea id="wordInput" oninput="resetPool()" placeholder="apple, banana, cherry, dragonfruit, elephant..."></textarea>
+    
+    <br>
+    <button onclick="generateWord()">Generate Word</button>
+    
+    <div id="result"></div>
+    <div id="status"></div>
+
+    <script>
+        // Global variables to track the current pool of remaining words
+        let remainingWords = [];
+        let totalCount = 0;
+
+        // Rebuilds the pool from the textarea input
+        function resetPool() {
+            const inputText = document.getElementById('wordInput').value;
+            
+            // Split words by commas, spaces, or newlines and clean them up
+            remainingWords = inputText
+                .split(/[\s,]+/)
+                .map(word => word.trim())
+                .filter(word => word.length > 0);
+                
+            totalCount = remainingWords.length;
+            updateStatus("");
+        }
+
+        // Updates the little counter helper text at the bottom
+        function updateStatus(note = "") {
+            const statusDiv = document.getElementById('status');
+            if (totalCount === 0) {
+                statusDiv.innerText = "";
+            } else {
+                statusDiv.innerText = `${remainingWords.length} of ${totalCount} words remaining. ${note}`;
+            }
+        }
+
+        function generateWord() {
+            const resultDiv = document.getElementById('result');
+            
+            // If the remaining pool is completely empty, try to reload from the input box
+            if (remainingWords.length === 0) {
+                resetPool();
+            }
+            
+            // If it is STILL empty, the user hasn't typed anything
+            if (remainingWords.length === 0) {
+                resultDiv.innerText = "Please add some words first!";
+                resultDiv.style.color = "red";
+                document.getElementById('status').innerText = "";
+                return;
+            }
+            
+            // Pick a random index from the REMAINING words only
+            const randomIndex = Math.floor(Math.random() * remainingWords.length);
+            
+            // Pull the word out of the array using splice (this removes it from future rolls)
+            const chosenWord = remainingWords.splice(randomIndex, 1)[0];
+            
+            // Display the chosen word
+            resultDiv.innerText = chosenWord;
+            resultDiv.style.color = "#333";
+            
+            // Check if that was the last word so we can tell the user it will reset next click
+            let systemNote = "";
+            if (remainingWords.length === 0) {
+                systemNote = "(All words used! Pool will reset on next click.)";
+            }
+            
+            updateStatus(systemNote);
+        }
+    </script>
+
+</body>
+</html>
